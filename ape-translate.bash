@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 function usage() {
     echo Usage: $0 [-d PATH] TRANSLATION FILE
     echo
