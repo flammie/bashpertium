@@ -50,4 +50,12 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
             apertium ${DSWITCH} ${ANTIPAIR}-morph |\
             egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
     fi
+else
+    apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
+        egrep -o '@[^<]*' |\
+        tr -d '@<' |\
+        sort |\
+        uniq |\
+        apertium ${DSWITCH} ${PAIR}-morph |\
+        egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
 fi
