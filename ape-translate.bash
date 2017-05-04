@@ -53,7 +53,7 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
 else
     apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
         egrep -o '@[^<]*' |\
-        tr -d '@<' |\
+        tr -d '@<#' |\
         sort |\
         uniq |\
         apertium ${DSWITCH} ${PAIR}-morph |\
