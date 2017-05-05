@@ -43,8 +43,9 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
         apertium ${DSWITCH} ${PAIR} < ${INFILE}
     else
         apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
-            egrep -o '#[^<]*' |\
-            tr -d '#<' |\
+            egrep -o '#[^<]*[^ ]*' |\
+            tr -d '#' |\
+            sed -e 's/</	\[</' -e 's/$/\]/' |\
             sort |\
             uniq |\
             apertium ${DSWITCH} ${ANTIPAIR}-morph |\
