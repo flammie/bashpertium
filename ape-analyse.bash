@@ -28,7 +28,7 @@ if test -z "$LL" ; then
     usage
     exit 1
 fi
-if test -z "$INFILE" ; then
+if test -z "${INFILE}" ; then
     usage
     exit 1
 fi
@@ -36,12 +36,15 @@ if ! test -r "$INFILE" ; then
     echo "Cannot open $INFILE for reading"
     exit 1
 fi
-if ! apertium ${DSWITCH} ${LL}-morph < ${INFILE} |\
+CLEANED=$(mktemp -t ape-analyse.XXXXXXXXXX )
+egrep -v '^#!' ${INFILE} > ${CLEANED}
+if ! apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
         fgrep --colour=always '*' ; then
     echo alles klar!
 else
-    apertium ${DSWITCH} ${LL}-morph < ${INFILE} |\
+    apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
         egrep -o '[*][^$]*' |\
         sort |\
         uniq
 fi
+rm -v ${CLEANED}
