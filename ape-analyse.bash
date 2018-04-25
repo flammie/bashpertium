@@ -1,5 +1,7 @@
 #!/bin/bash
 #set -x
+source $(dirname $0)/ape.bash
+
 function usage() {
     echo Usage: $0 [-d PATH] LANGCODE FILE
     echo
@@ -38,6 +40,9 @@ if ! test -r "$INFILE" ; then
 fi
 CLEANED=$(mktemp -t ape-analyse.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} > ${CLEANED}
+if test "x$DSWITCH" = "x-d ." ; then 
+    ape_remake
+fi
 if ! apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
         fgrep --colour=always '*' ; then
     echo alles klar!
