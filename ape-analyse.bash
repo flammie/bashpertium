@@ -7,6 +7,8 @@ function usage() {
     echo    -d PATH   use PATH to find modes
     echo
     echo LANGCODE is apertium monolingual definition, typically ISO-639-3 code
+    echo FILE should be text/plain or text-with-metadata container¹
+    echo "¹ <https://github.com/flammie/bash-corpora#text-container-files>"
     echo
 }
 DSWITCH="-d ."

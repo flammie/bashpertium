@@ -24,6 +24,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror -Wno-portability foreign])
 
 # Programs
 
+AC_PATH_PROG([MKTEMP], [mktemp], [echo])
 # some oses are broken
 AC_PATH_PROGS_FEATURE_CHECK([SED], [gnused gsed sed],
               [[m4out=`echo aaa | $ac_path_SED 's/a/\n/g' | wc -l`

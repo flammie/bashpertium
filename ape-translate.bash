@@ -6,6 +6,8 @@ function usage() {
     echo    -d PATH   use PATH to find modes
     echo
     echo TRANSLATION is apertium pair definition, e.g. qzr-qaa
+    echo FILE should be text/plain or text-with-metadata container¹
+    echo "¹ <https://github.com/flammie/bash-corpora#text-container-files>"
     echo
 }
 DSWITCH="-d ."
@@ -35,14 +37,16 @@ if ! test -r "$INFILE" ; then
     echo "Cannot open $INFILE for reading"
     exit 1
 fi
+CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
+egrep -v '^#!' ${INFILE} | tail -n +2 > ${CLEANED}
 ANTIPAIR=${PAIR#???-}-${PAIR%-???}
-if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
+if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
     fgrep --colour=always '@' ; then
-    if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
+    if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
         fgrep --colour=always '#' ; then
-        apertium ${DSWITCH} ${PAIR} < ${INFILE}
+        apertium ${DSWITCH} ${PAIR} < ${CLEANED}
     else
-        apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
+        apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
             egrep -o '#[^<]*[^ ]*' |\
             tr -d '#' |\
             sed -e 's/</	\[</' -e 's/$/\]/' |\
@@ -52,7 +56,7 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
             egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
     fi
 else
-    apertium ${DSWITCH} ${PAIR}-debug < ${INFILE} |\
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
         egrep -o '@[^<]*' |\
         tr -d '@<#' |\
         sort |\
