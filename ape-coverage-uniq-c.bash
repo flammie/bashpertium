@@ -32,7 +32,7 @@ case $LANGSPEC in
     *-*)
 cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-debug |\
-    sed -e 's/^ *//' -e 's/ *$//' |\
+    sed -e 's/^ *[@*#]\?//' -e 's/ *$//' |\
     tr ' ' '\t' |\
     awk -F '\t' '
 BEGIN {ATS=0;STARS=0;HASH=0;ALL=0}
@@ -48,10 +48,10 @@ END {
     *)
 cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-morph |\
-    sed -e 's/^ *//' -e 's/ *$//' |\
+    sed -e 's/^ *[@*#]\?//' -e 's/ *[^]\?$//' |\
     tr '/' '\t' | sed -e 's/^ *\^//' -e 's/\$ *//' |\
     awk -F '\t' '
-BEGIN {COV=0;UNK=0;}
+BEGIN {COV=0;UNK=0;ALL=0}
 $2 ~ /^[*]/ {STARS+=$1;}
 {ALL+=$1;}
 END {
