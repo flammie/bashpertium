@@ -8,7 +8,8 @@ function usage() {
     echo
     echo LANGUAGE-OR-PAIR is an apertium language spec definition, e.g. qzr or
     echo    qzr-qaa
-    echo FILE should be pre-tokenised!! If not given stdin will be read.
+    echo FILE should be formatted like uniq -c output.
+    echo If FILE is not given stdin will be read.
     echo
 }
 DSWITCH=""
@@ -29,7 +30,7 @@ done
 
 case $LANGSPEC in
     *-*)
-cat $INFILE | tr -s ' ' '\n' | sort | uniq -c | sort -nr |\
+cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-debug |\
     sed -e 's/^ *//' -e 's/ *$//' |\
     tr ' ' '\t' |\
@@ -45,7 +46,7 @@ END {
     printf("# %f %% (%d / %d)\n", 100*HASH/ALL, HASH, ALL);
 }';;
     *)
-cat $INFILE | tr -s ' ' '\n' | sort | uniq -c | sort -nr |\
+cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-morph |\
     sed -e 's/^ *//' -e 's/ *$//' |\
     tr '/' '\t' | sed -e 's/^ *\^//' -e 's/\$ *//' |\
