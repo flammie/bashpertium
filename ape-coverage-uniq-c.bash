@@ -48,7 +48,7 @@ END {
     *)
 cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-morph |\
-    sed -e 's/^ *[@*#]\?//' -e 's/ *[^]\?$//' |\
+    sed -e 's/^ *[@*#]\?//' -e 's/ *[\^]\?$//' |\
     tr '/' '\t' | sed -e 's/^ *\^//' -e 's/\$ *//' |\
     awk -F '\t' '
 BEGIN {COV=0;UNK=0;ALL=0}
