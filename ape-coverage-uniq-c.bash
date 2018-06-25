@@ -44,6 +44,9 @@ END {
     printf("* %f %% (%d / %d)\n", 100*STARS/ALL, STARS, ALL);
     printf("@ %f %% (%d / %d)\n", 100*ATS/ALL, ATS, ALL);
     printf("# %f %% (%d / %d)\n", 100*HASH/ALL, HASH, ALL);
+    printf("---\n");
+    printf("OK %f % (%d / %d\n", 100*(ALL-STARS-ATS-HASH)/ALL,
+           ALL-STARS-ATS-HASH, ALL);
 }';;
     *)
 cat $INFILE |\
@@ -56,5 +59,7 @@ $2 ~ /^[*]/ {STARS+=$1;}
 {ALL+=$1;}
 END {
     printf("* %f %% (%d / %d)\n", 100*STARS/ALL, STARS, ALL);
+    printf("---\n");
+    printf("OK %f %% (%d / %d)\n", 100*(ALL-STARS)/ALL, ALL-STARS, ALL);
 }';;
 esac
