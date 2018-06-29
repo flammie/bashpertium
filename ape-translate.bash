@@ -1,4 +1,7 @@
 #!/bin/bash
+#set -x
+source $(dirname $0)/ape.bash
+
 function usage() {
     echo Usage: $0 [-d PATH] TRANSLATION FILE
     echo
@@ -36,6 +39,9 @@ fi
 if ! test -r "$INFILE" ; then
     echo "Cannot open $INFILE for reading"
     exit 1
+fi
+if test "x$DSWITCH" = "x-d ." ; then 
+    ape_remake
 fi
 CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} | tail -n +2 > ${CLEANED}
