@@ -40,7 +40,7 @@ if ! test -r "$INFILE" ; then
     echo "Cannot open $INFILE for reading"
     exit 1
 fi
-if test "x$DSWITCH" = "x-d ." ; then 
+if test "x$DSWITCH" = "x-d ." ; then
     ape_remake
 fi
 CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
@@ -55,10 +55,11 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
         apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
             egrep -o '#[^<]*[^ ]*' |\
             tr -d '#' |\
-            sed -e 's/</	\[</' -e 's/$/\]/' |\
+            sed -e 's/</	<!-- </' -e 's/$/ -->/' |\
             sort |\
             uniq |\
-            apertium ${DSWITCH} ${ANTIPAIR}-morph |\
+            apertium -f html ${DSWITCH} ${ANTIPAIR}-morph |\
+            recode html..utf8 |
             egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
     fi
 else
