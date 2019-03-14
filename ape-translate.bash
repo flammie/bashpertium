@@ -49,20 +49,24 @@ ANTIPAIR=${PAIR#???-}-${PAIR%-???}
 
 echo scanning for source OOVs
 select a in yes no ; do
-    if apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    if test x$a = xno ; then
+        break;
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
             fgrep --colour=always '*' ; then
         break
-    elif x$a = xyes ; then
-        break;
     fi
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+        egrep -o '\*[^ ]*' |\
+        sort |\
+        uniq
     echo once more?
 done
 echo scanning for bidix OOVs
 select a in yes no ; do
-    if apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-            fgrep --colour=always '@' ; then
+    if test x$a = xno ; then
         break
-    elif x$a = xyes ; then
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '@' ; then
         break
     fi
     apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
@@ -76,19 +80,20 @@ select a in yes no ; do
 done
 echo scanning for target OOVs
 select a in yes no ; do
-    if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-        fgrep --colour=always '#' ; then
-        apertium ${DSWITCH} ${PAIR} < ${CLEANED}
-    else
-        apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-            egrep -o '#[^<]*[^ ]*' |\
-            tr -d '#' |\
-            sed -e 's/</	\[</' -e 's/$/\]/' |\
-            sort |\
-            uniq |\
-            apertium ${DSWITCH} ${ANTIPAIR}-morph |\
-            egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
+    if test x$a = xno ; then
+        break
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '#' ; then
+        break
     fi
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+        egrep -o '#[^<]*[^ ]*' |\
+        tr -d '#' |\
+        sed -e 's/</	\[</' -e 's/$/\]/' |\
+        sort |\
+        uniq |\
+        apertium ${DSWITCH} ${ANTIPAIR}-morph |\
+        egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
     echo keep going?
 done
 apertium ${DSWITCH} ${PAIR} < ${CLEANED}
