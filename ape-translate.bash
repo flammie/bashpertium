@@ -46,8 +46,36 @@ fi
 CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} | tail -n +2 > ${CLEANED}
 ANTIPAIR=${PAIR#???-}-${PAIR%-???}
-if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-    fgrep --colour=always '@' ; then
+
+echo scanning for source OOVs
+select a in yes no ; do
+    if apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '*' ; then
+        break
+    elif x$a = xyes ; then
+        break;
+    fi
+    echo once more?
+done
+echo scanning for bidix OOVs
+select a in yes no ; do
+    if apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '@' ; then
+        break
+    elif x$a = xyes ; then
+        break
+    fi
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+        egrep -o '@[^<@*]*' |\
+        tr -d '@<#' |\
+        sort |\
+        uniq |\
+        apertium ${DSWITCH} ${PAIR}-morph |\
+        egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
+    echo ones more?
+done
+echo scanning for target OOVs
+select a in yes no ; do
     if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
         fgrep --colour=always '#' ; then
         apertium ${DSWITCH} ${PAIR} < ${CLEANED}
@@ -61,12 +89,6 @@ if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
             apertium ${DSWITCH} ${ANTIPAIR}-morph |\
             egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
     fi
-else
-    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-        egrep -o '@[^<]*' |\
-        tr -d '@<#' |\
-        sort |\
-        uniq |\
-        apertium ${DSWITCH} ${PAIR}-morph |\
-        egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
-fi
+    echo keep going?
+done
+apertium ${DSWITCH} ${PAIR} < ${CLEANED}
