@@ -46,28 +46,54 @@ fi
 CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} | tail -n +2 > ${CLEANED}
 ANTIPAIR=${PAIR#???-}-${PAIR%-???}
-if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-    fgrep --colour=always '@' ; then
-    if ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-        fgrep --colour=always '#' ; then
-        apertium ${DSWITCH} ${PAIR} < ${CLEANED}
-    else
-        apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-            egrep -o '#[^<]*[^ ]*' |\
-            tr -d '#' |\
-            sed -e 's/</	<!-- </' -e 's/$/ -->/' |\
-            sort |\
-            uniq |\
-            apertium -f html ${DSWITCH} ${ANTIPAIR}-morph |\
-            recode html..utf8 |
-            egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
+
+echo scanning for source OOVs
+select a in yes no ; do
+    if test x$a = xno ; then
+        break;
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '*' ; then
+        break
     fi
-else
     apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
-        egrep -o '@[^<]*' |\
+        egrep -o '\*[^ ]*' |\
+        sort |\
+        uniq
+    echo once more?
+done
+echo scanning for bidix OOVs
+select a in yes no ; do
+    if test x$a = xno ; then
+        break
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '@' ; then
+        break
+    fi
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+        egrep -o '@[^<@*]*' |\
         tr -d '@<#' |\
         sort |\
         uniq |\
         apertium ${DSWITCH} ${PAIR}-morph |\
         egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
-fi
+    echo ones more?
+done
+echo scanning for target OOVs
+select a in yes no ; do
+    if test x$a = xno ; then
+        break
+    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+            fgrep --colour=always '#' ; then
+        break
+    fi
+    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+        egrep -o '#[^<]*[^ ]*' |\
+        tr -d '#' |\
+        sed -e 's/</	<!-- </' -e 's/$/ -->/' |\
+        sort |\
+        uniq |\
+        apertium ${DSWITCH} -f html-noent ${ANTIPAIR}-morph |\
+        egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
+    echo keep going?
+done
+apertium ${DSWITCH} ${PAIR} < ${CLEANED}
