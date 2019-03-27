@@ -47,8 +47,11 @@ CLEANED=$(mktemp -t ape-translate.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} | tail -n +2 > ${CLEANED}
 ANTIPAIR=${PAIR#???-}-${PAIR%-???}
 
-echo scanning for source OOVs
+echo scan for source OOVs?
 select a in yes no ; do
+    if test "x$DSWITCH" = "x-d ." ; then
+        ape_remake
+    fi
     if test x$a = xno ; then
         break;
     elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
@@ -59,10 +62,13 @@ select a in yes no ; do
         egrep -o '\*[^ ]*' |\
         sort |\
         uniq
-    echo once more?
+    echo "once more? (1=yes 2=no)"
 done
-echo scanning for bidix OOVs
+echo scan for bidix OOVs?
 select a in yes no ; do
+    if test "x$DSWITCH" = "x-d ." ; then
+        ape_remake
+    fi
     if test x$a = xno ; then
         break
     elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
@@ -76,10 +82,13 @@ select a in yes no ; do
         uniq |\
         apertium ${DSWITCH} ${PAIR}-morph |\
         egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
-    echo ones more?
+    echo "ones more? (1=yes 2=no)"
 done
-echo scanning for target OOVs
+echo scan for target OOVs?
 select a in yes no ; do
+    if test "x$DSWITCH" = "x-d ." ; then
+        ape_remake
+    fi
     if test x$a = xno ; then
         break
     elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
@@ -94,6 +103,6 @@ select a in yes no ; do
         uniq |\
         apertium ${DSWITCH} -f html-noent ${ANTIPAIR}-morph |\
         egrep '[[:alnum:]]*<[[:alnum:]<>]*' --colour=always
-    echo keep going?
+    echo "keep going? (1=yes 2=no)"
 done
 apertium ${DSWITCH} ${PAIR} < ${CLEANED}
