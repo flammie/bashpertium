@@ -42,16 +42,21 @@ if ! test -r "$INFILE" ; then
 fi
 CLEANED=$(mktemp -t ape-analyse.XXXXXXXXXX )
 egrep -v '^#!' ${INFILE} > ${CLEANED}
-if test "x$DSWITCH" = "x-d ." ; then 
-    ape_remake
-fi
-if ! apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
-        fgrep --colour=always '*' ; then
-    echo alles klar!
-else
+echo scan for OOVs?
+select a in yes no ; do
+    if test "x$DSWITCH" = "x-d ." ; then
+        ape_remake
+    fi
+    if test x$a = xno ; then
+        break
+    elif ! apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
+            fgrep --colour=always '*' ; then
+        echo alles klar!
+    fi
     apertium ${DSWITCH} ${LL}-morph < ${CLEANED} |\
         egrep -o '[*][^$]*' |\
         sort |\
         uniq
-fi
+    echo "retry? (1=yes 2=no)"
+done
 rm -v ${CLEANED}
