@@ -52,10 +52,11 @@ END {
 cat $INFILE |\
     apertium -f line $DSWITCH $LANGSPEC-morph |\
     sed -e 's/^ *[@*#]\?//' -e 's/ *[\^]\?$//' |\
-    tr '/' '\t' | sed -e 's/^ *\^//' -e 's/\$ *//' |\
+    sed -e 's/^^\([[:digit:]]*\)\/[^\$]*\$/\1/' |\
+    tr ' ' '\t' |\
     awk -F '\t' '
 BEGIN {COV=0;UNK=0;ALL=0}
-$2 ~ /^[*]/ {STARS+=$1;}
+$2 ~ /\/[*]/ {STARS+=$1;}
 {ALL+=$1;}
 END {
     printf("* %f %% (%d / %d)\n", 100*STARS/ALL, STARS, ALL);
