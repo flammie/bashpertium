@@ -54,11 +54,11 @@ select a in yes no ; do
     fi
     if test x$a = xno ; then
         break;
-    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    elif ! apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
             fgrep --colour=always '*' ; then
         break
     fi
-    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
         egrep -o '\*[^ ]*' |\
         sort |\
         uniq
@@ -71,11 +71,11 @@ select a in yes no ; do
     fi
     if test x$a = xno ; then
         break
-    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    elif ! apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
             fgrep --colour=always '@' ; then
         break
     fi
-    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
         egrep -o '@[^<@*]*' |\
         tr -d '@<#' |\
         sort |\
@@ -91,11 +91,11 @@ select a in yes no ; do
     fi
     if test x$a = xno ; then
         break
-    elif ! apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    elif ! apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
             fgrep --colour=always '#' ; then
         break
     fi
-    apertium ${DSWITCH} ${PAIR}-debug < ${CLEANED} |\
+    apertium ${DSWITCH} ${PAIR}-dgen < ${CLEANED} |\
         egrep -o '#[^<]*[^ ]*' |\
         tr -d '#' |\
         sed -e 's/</	<!-- </' -e 's/$/ -->/' |\
@@ -106,3 +106,4 @@ select a in yes no ; do
     echo "keep going? (1=yes 2=no)"
 done
 apertium ${DSWITCH} ${PAIR} < ${CLEANED}
+rm -v ${CLEANED}
