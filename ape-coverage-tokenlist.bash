@@ -11,7 +11,11 @@ function usage() {
     echo FILE should be pre-tokenised!! If not given stdin will be read.
     echo
 }
-DSWITCH=""
+if test $# -lt 1 ; then
+    usage
+    exit 1
+fi
+DSWITCH="-d ."
 while test $# -gt 0 ; do
     case $1 in
         -d)
@@ -26,11 +30,10 @@ while test $# -gt 0 ; do
             shift;;
     esac
 done
-
 case $LANGSPEC in
     *-*)
 cat $INFILE | tr -s ' ' '\n' | sort | uniq -c | sort -nr |\
-    apertium -f line $DSWITCH $LANGSPEC-debug |\
+    apertium -f line $DSWITCH @$LANGSPEC-dgen |\
     sed -e 's/^ [@*#]\?*//' -e 's/ *$//' |\
     tr ' ' '\t' |\
     awk -F '\t' '

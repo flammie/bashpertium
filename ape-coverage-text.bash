@@ -8,11 +8,17 @@ function usage() {
     echo
     echo LANGUAGE-OR-PAIR is an apertium language spec definition, e.g. qzr or
     echo    qzr-qaa
-    echo FILE should be formatted like uniq -c output.
-    echo If FILE is not given stdin will be read.
+    echo FILE will be dummy-tokenised! If not given stdin will be read.
     echo
 }
-DSWITCH=""
+function tokenise() {
+    cat $@ | sed -e 's/[.,!?"-]/\0 /g' | tr -s ' ' '\n'
+}
+if test $# -lt 1 ; then
+    usage
+    exit 1
+fi
+DSWITCH="-d ."
 while test $# -gt 0 ; do
     case $1 in
         -d)
@@ -27,12 +33,11 @@ while test $# -gt 0 ; do
             shift;;
     esac
 done
-
 case $LANGSPEC in
     *-*)
-cat $INFILE |\
+tokenise |
     apertium -f line $DSWITCH @$LANGSPEC-dgen |\
-    sed -e 's/^ *[@*#]\?//' -e 's/ *$//' |\
+    sort | uniq -c | sort -nr | sed -e 's/^ *//' |
     tr ' ' '\t' |\
     awk -F '\t' '
 BEGIN {ATS=0;STARS=0;HASH=0;ALL=0}
@@ -44,23 +49,17 @@ END {
     printf("* %f %% (%d / %d)\n", 100*STARS/ALL, STARS, ALL);
     printf("@ %f %% (%d / %d)\n", 100*ATS/ALL, ATS, ALL);
     printf("# %f %% (%d / %d)\n", 100*HASH/ALL, HASH, ALL);
-    printf("---\n");
-    printf("OK %f % (%d / %d\n", 100*(ALL-STARS-ATS-HASH)/ALL,
-           ALL-STARS-ATS-HASH, ALL);
 }';;
     *)
-cat $INFILE |\
+tokenise |
     apertium -f line $DSWITCH $LANGSPEC-morph |\
-    sed -e 's/^ *[@*#]\?//' -e 's/ *[\^]\?$//' |\
-    sed -e 's/^^\([[:digit:]]*\)\/[^\$]*\$/\1/' |\
+    sort | uniq -c | sort -nr | sed -e 's/^ *//' |
     tr ' ' '\t' |\
     awk -F '\t' '
-BEGIN {COV=0;UNK=0;ALL=0}
-$2 ~ /\/[*]/ {STARS+=$1;}
+BEGIN {COV=0;UNK=0;}
+$2 ~ /^[*]/ {STARS+=$1;}
 {ALL+=$1;}
 END {
     printf("* %f %% (%d / %d)\n", 100*STARS/ALL, STARS, ALL);
-    printf("---\n");
-    printf("OK %f %% (%d / %d)\n", 100*(ALL-STARS)/ALL, ALL-STARS, ALL);
 }';;
 esac
